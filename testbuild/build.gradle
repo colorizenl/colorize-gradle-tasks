@@ -1,0 +1,10 @@
+buildscript {
+	dependencies {
+		classpath files('../build/libs/colorize-gradle-tasks.jar')
+	}
+}
+
+apply plugin: 'nl.colorize.gradle.webapp'
+
+webApp.sourceDir = 'resources'
+webApp.buildDir = 'build'
