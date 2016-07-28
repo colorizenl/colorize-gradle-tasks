@@ -19,7 +19,9 @@ The plugin adds the following properties that can be used to configure these ste
   - **buildDir**: Destination directory for the packages web application. The default location is
     `build/web` (relative to the project directory).
   - **combinedJavaScriptFileName**: File name for the JavaScript file that is created during the
-    build by combining all JavaScript source files. The default name is `combined.js`. 
+    build by combining all JavaScript source files. The default name is `combined.js`.
+  - **excludedJavaScriptFiles**: List of patterns for JavaScript files that should be ignored
+    during the build. 
   - **charset**: Character encoding that is used to read and write text files. The default value
     is UTF-8.
     

@@ -4,7 +4,7 @@
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
-package nl.colorize.gradle;
+package nl.colorize.gradle.webapp;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +17,9 @@ import org.gradle.api.Project;
 import org.gradle.internal.impldep.com.google.common.io.Files;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
+
+import nl.colorize.gradle.webapp.CombineJavaScriptTask;
+import nl.colorize.gradle.webapp.WebAppPlugin;
 
 public class TestCombineJavaScriptTask {
 	
@@ -58,10 +61,31 @@ public class TestCombineJavaScriptTask {
 		assertEquals("f.js", ordered.get(5).getName());
 	}
 	
+	@Test
+	public void testExcludeJavaScriptFiles() throws Exception {
+		Project project = createProject();
+		WebAppExtension config = new WebAppExtension();
+		config.setSourceDir("resources");
+		List<File> jsFiles = config.findJavaScriptFiles(project);
+		
+		assertEquals(2, jsFiles.size());
+		assertEquals("first.js", jsFiles.get(0).getName());
+		assertEquals("second.js", jsFiles.get(1).getName());
+		
+		config.setExcludedJavaScriptFiles(Arrays.asList("*fir*"));
+		jsFiles = config.findJavaScriptFiles(project);
+		
+		assertEquals(1, jsFiles.size());
+		assertEquals("second.js", jsFiles.get(0).getName());
+	}
+	
+	private Project createProject() {
+		return ProjectBuilder.builder().withProjectDir(new File("testbuild")).build();
+	}
+	
 	private CombineJavaScriptTask createTask() {
-		Project project = ProjectBuilder.builder().build();
-		WebAppPlugin plugin = new WebAppPlugin();
-		plugin.apply(project);
+		Project project = createProject();
+		new WebAppPlugin().apply(project);
 		return (CombineJavaScriptTask) project.getTasks().getByName("combineJavaScript");
 	}
 }

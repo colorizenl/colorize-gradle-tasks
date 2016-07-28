@@ -4,7 +4,7 @@
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
-package nl.colorize.gradle;
+package nl.colorize.gradle.webapp;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.tasks.TaskAction;
 
 /**
@@ -29,23 +28,23 @@ public class PackageWebAppTask extends DefaultTask {
 	@TaskAction
 	public void run() {
 		WebAppExtension config = getProject().getExtensions().getByType(WebAppExtension.class);
-		ConfigurableFileTree sourceFiles = getProject().fileTree(config.getSourceDir());
-		File buildDir = getProject().file(config.getBuildDir());
+		File buildDir = config.getBuildDir(getProject());
 		
-		for (File sourceFile : sourceFiles.getFiles()) {
+		for (File sourceFile : config.getSourceTree(getProject()).getFiles()) {
 			File outputFile = new File(buildDir.getAbsolutePath() + "/" + 
 					config.toRelativePath(getProject(), sourceFile));
 			
 			if (shouldRewriteSourceFile(sourceFile)) {
 				rewriteFile(sourceFile, outputFile, config);
-			} else if (shouldCopySourceFile(sourceFile)) {
+			} else if (shouldCopySourceFile(sourceFile, config)) {
 				copyFile(sourceFile, outputFile, config);
 			}
 		}
 	}
 	
-	private boolean shouldCopySourceFile(File sourceFile) {
-		return !sourceFile.getName().endsWith(".js");
+	private boolean shouldCopySourceFile(File sourceFile, WebAppExtension config) {
+		List<File> jsSourceFiles = config.findJavaScriptFiles(getProject());
+		return !jsSourceFiles.contains(sourceFile);
 	}
 	
 	private boolean shouldRewriteSourceFile(File sourceFile) {
@@ -97,7 +96,7 @@ public class PackageWebAppTask extends DefaultTask {
 	private String rewriteJavaScriptFileReferences(String line, WebAppExtension config) {
 		List<String> references = new ArrayList<>();
 		for (File jsFile : config.findJavaScriptFiles(getProject())) {
-			references.add(config.toRelativePath(getProject(), jsFile));
+			references.add(jsFile.getName());
 		}
 		return rewriteJavaScriptFileReferences(line, references, config.getCombinedJavaScriptFileName());
 	}

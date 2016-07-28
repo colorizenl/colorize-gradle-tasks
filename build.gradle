@@ -14,7 +14,7 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'com.gradle.plugin-publish'
 apply plugin: 'eclipse'
 
-version = '2016.5'
+version = '2016.6'
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 compileJava.options.encoding = 'UTF-8'
@@ -39,7 +39,7 @@ gradlePlugin {
 	plugins {
 		webAppPlugin {
 			id = 'nl.colorize.gradle.webapp'
-			implementationClass = 'nl.colorize.gradle.WebAppPlugin'
+			implementationClass = 'nl.colorize.gradle.webapp.WebAppPlugin'
 		}
 	}
 }

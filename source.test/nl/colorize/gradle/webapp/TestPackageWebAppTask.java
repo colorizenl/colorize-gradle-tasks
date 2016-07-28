@@ -4,7 +4,7 @@
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
-package nl.colorize.gradle;
+package nl.colorize.gradle.webapp;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +14,9 @@ import java.util.List;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
+
+import nl.colorize.gradle.webapp.PackageWebAppTask;
+import nl.colorize.gradle.webapp.WebAppPlugin;
 
 public class TestPackageWebAppTask {
 

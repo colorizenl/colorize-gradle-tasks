@@ -4,10 +4,12 @@
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
-package nl.colorize.gradle;
+package nl.colorize.gradle.webapp;
 
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.plugins.WarPlugin;
@@ -29,7 +31,17 @@ public class WebAppPlugin implements Plugin<Project> {
 		initConfiguration(project.getExtensions());
 		initTasks(project.getTasks());
 	
-		integrateWithOtherPlugins(project);
+		// Integrate with the 'war' plugin if that has also been 
+		// applied by the project.
+		if (project.getPlugins().hasPlugin(WarPlugin.class) || hasTask(project, "war")) {
+			integrateWithWarPlugin(project.getTasks());
+		}
+		
+		// Ensure that all NPM and/or Bower libraries have been 
+		// downloaded and refreshed.
+		if (hasTask(project, "clientRefresh")) {
+			integrateWithClientLibrariesPlugin(project.getTasks());
+		}
 	}
 
 	private void initConfiguration(ExtensionContainer extensions) {
@@ -44,12 +56,30 @@ public class WebAppPlugin implements Plugin<Project> {
 		tasks.getByName("packageWebApp").dependsOn("combineJavaScript");
 	}
 	
-	private void integrateWithOtherPlugins(Project project) {
-		// If the WAR plugin is also used in the same project, make sure
-		// the packaged web application is used instead of the original
-		// source files.
-		if (project.getPlugins().hasPlugin(WarPlugin.class)) {
-			//TODO
+	private boolean hasTask(Project project, String taskName) {
+		try {
+			project.getTasks().getByName(taskName);
+			return true;
+		} catch (UnknownTaskException e) {
+			return false;
 		}
+	}
+	
+	/**
+	 * If the WAR plugin is also used in the same project, include the packaged 
+	 * web application into the WAR file instead of the original source files.
+	 */
+	private void integrateWithWarPlugin(final TaskContainer tasks) {
+		tasks.create("repackageWAR", RepackageWarFileTask.class);
+		tasks.getByName("war").dependsOn("packageWebApp");
+		tasks.getByName("war").doLast(new Action<Object>() {
+			public void execute(Object context) {
+				((RepackageWarFileTask) tasks.getByName("repackageWAR")).execute();
+			}
+		});
+	}
+	
+	private void integrateWithClientLibrariesPlugin(TaskContainer tasks) {
+		tasks.getByName("packageWebApp").dependsOn("clientRefresh");
 	}
 }

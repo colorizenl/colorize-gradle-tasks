@@ -4,7 +4,7 @@
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
-package nl.colorize.gradle;
+package nl.colorize.gradle.webapp;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +31,7 @@ public class CombineJavaScriptTask extends DefaultTask {
 	public void run() {
 		WebAppExtension config = getProject().getExtensions().getByType(WebAppExtension.class);
 		List<File> jsFiles = getOrderedJavaScriptFiles(config);
-		File combinedFile = new File(getProject().file(config.getBuildDir()), 
-				config.getCombinedJavaScriptFileName());
+		File combinedFile = config.getCombinedJavaScriptFile(getProject());
 		config.prepareOutputFile(combinedFile);
 
 		createCombinedFile(jsFiles, combinedFile, config.getCharsetObject());
