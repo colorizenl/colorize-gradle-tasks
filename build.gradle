@@ -14,7 +14,7 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'com.gradle.plugin-publish'
 apply plugin: 'eclipse'
 
-version = '2016.6'
+version = '2016.7'
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 compileJava.options.encoding = 'UTF-8'
@@ -48,7 +48,7 @@ pluginBundle {
 	website = 'http://www.colorize.nl/en/'
 	vcsUrl = 'https://github.com/colorizenl/colorize-gradle-tasks'
 	description = 'Gradle plugin for building HTML/CSS/JavaScript web applications.'
-	tags = ['webapp', 'webapplication', 'html', 'css', 'javascript']
+	tags = ['webapp', 'webapplication', 'html', 'css', 'javascript', 'js']
 	
 	plugins {
 		webAppPlugin {

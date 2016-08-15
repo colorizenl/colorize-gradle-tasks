@@ -25,7 +25,11 @@ public class WebAppExtension {
 	private String buildDir;
 	private String combinedJavaScriptFileName;
 	private List<String> excludedJavaScriptFiles;
+	private boolean combineJavaScriptLibraries;
 	private String charset;
+	
+	public static final List<String> JAVASCRIPT_LIBRARY_DIRECTORIES = Arrays.asList(
+				"/lib/", "/node_modules/", "/bower_components/");
 	
 	private static final List<String> DEFAULT_JAVASCRIPT_EXCLUDES = Arrays.asList(
 			"index.js", "*.bundle.js");
@@ -35,6 +39,7 @@ public class WebAppExtension {
 		buildDir = "build/web";
 		combinedJavaScriptFileName = "combined.js";
 		excludedJavaScriptFiles = new ArrayList<>();
+		combineJavaScriptLibraries = false;
 		charset = "UTF-8";
 	}
 	
@@ -82,7 +87,20 @@ public class WebAppExtension {
 		List<String> excluded = new ArrayList<>();
 		excluded.addAll(excludedJavaScriptFiles);
 		excluded.addAll(DEFAULT_JAVASCRIPT_EXCLUDES);
+		if (!combineJavaScriptLibraries) {
+			for (String jsLibDir : JAVASCRIPT_LIBRARY_DIRECTORIES) {
+				excluded.add("**" + jsLibDir + "**");
+			}
+		}
 		return excluded;
+	}
+	
+	public void setCombineJavaScriptLibraries(boolean combineJavaScriptLibraries) {
+		this.combineJavaScriptLibraries = combineJavaScriptLibraries;
+	}
+	
+	public boolean getCombineJavaScriptLibraries() {
+		return combineJavaScriptLibraries;
 	}
 
 	public void setCharset(String charset) {
@@ -140,7 +158,7 @@ public class WebAppExtension {
 	public List<File> findJavaScriptFiles(Project project) {
 		ConfigurableFileTree fileTree = project.fileTree(sourceDir);
 		fileTree.include("**/*.js");
-		fileTree.exclude(excludedJavaScriptFiles);
+		fileTree.exclude(getExcludedJavaScriptFiles());
 		
 		List<File> jsFiles = new ArrayList<>();
 		jsFiles.addAll(fileTree.getFiles());

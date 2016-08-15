@@ -2,6 +2,7 @@ binaries/
 bin/
 build/
 .gradle/
+testbuild/userHome/
 .project
 .classpath
 .settings/

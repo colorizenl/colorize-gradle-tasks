@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -51,10 +50,10 @@ public class CombineJavaScriptTask extends DefaultTask {
 
 	private List<File> getOrderedJavaScriptFiles(WebAppExtension config) {
 		List<File> jsFiles = config.findJavaScriptFiles(getProject());
-		return getOrderedJavaScriptFiles(jsFiles);
+		return getOrderedJavaScriptFiles(jsFiles, config);
 	}
 
-	protected List<File> getOrderedJavaScriptFiles(List<File> jsFiles) {
+	protected List<File> getOrderedJavaScriptFiles(List<File> jsFiles, WebAppExtension config) {
 		List<File> ordered = new ArrayList<>();
 		ordered.addAll(jsFiles);
 		Collections.sort(ordered, new LibrariesFirstComparator());
@@ -76,9 +75,6 @@ public class CombineJavaScriptTask extends DefaultTask {
 	 */
 	private static class LibrariesFirstComparator implements Comparator<File> {
 		
-		private static final List<String> LIBRARY_DIRECTORIES = Arrays.asList(
-				"/lib/", "/node_modules/", "/bower_components/");
-
 		public int compare(File a, File b) {
 			boolean aIsLibrary = isLibrary(a);
 			boolean bIsLibrary = isLibrary(b);
@@ -93,7 +89,7 @@ public class CombineJavaScriptTask extends DefaultTask {
 		}
 		
 		private boolean isLibrary(File jsFile) {
-			for (String libDir : LIBRARY_DIRECTORIES) {
+			for (String libDir : WebAppExtension.JAVASCRIPT_LIBRARY_DIRECTORIES) {
 				if (jsFile.getAbsolutePath().contains(libDir)) {
 					return true;
 				}

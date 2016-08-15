@@ -11,6 +11,9 @@ application consists of the following steps:
   - The resulting HTML, CSS, and JavaScript files are copied to the `build/web` directory.
   - If the *war* plugin is also used in the same project to build Java web applications, the 
     packaged web application will also be included in the WAR file.
+  - If the [client dependencies plugin](https://github.com/craigburke/client-dependencies-gradle)
+    is also used in the same project, all NPM and/or Bower dependencies will be refreshed before
+    packaging the web application.
   
 The plugin adds the following properties that can be used to configure these steps:
 
@@ -22,36 +25,20 @@ The plugin adds the following properties that can be used to configure these ste
     build by combining all JavaScript source files. The default name is `combined.js`.
   - **excludedJavaScriptFiles**: List of patterns for JavaScript files that should be ignored
     during the build. 
+  - **combineJavaScriptLibraries**: Sets if JavaScript libraries should also be included in the
+    combined JavaScript file. Detection of library files is based on directory structure (i.e.
+    `lib/`, `node_modules/`, `bower_components/`). The default value is `false`.
   - **charset**: Character encoding that is used to read and write text files. The default value
     is UTF-8.
     
 The following example shows how to use the plugin from a Gradle build script:
 
-    buildscript {
-        repositories {
-            ivy {
-                url 'http://dev.colorize.nl/repo'
-            }
-        }
-    
-        dependencies {
-            classpath 'nl.colorize:colorize-gradle-tasks:2016.4'
-        }
+    plugins {
+    	id 'nl.colorize.gradle.webapp' version '2016.7'
     }
     
-    apply plugin: 'nl.colorize.gradle.webapp'
-
     webApp.sourceDir = 'src'
     webApp.buildDir = 'build'
-  
-Building
---------
-
-Building the plugin itself requires the [Java JDK](http://java.oracle.com) and 
-[Gradle](http://gradle.org). The following Gradle build tasks are available:
-
-- `gradle clean` cleans the build directory.
-- `gradle assemble` creates the JAR file for distribution.
 
 License
 -------
