@@ -24,12 +24,16 @@ import java.util.zip.ZipOutputStream;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.bundling.War;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Repackages a WAR file by replacing the JavaScript source files with the
  * combined JavaScript file. 
  */
 public class RepackageWarFileTask extends DefaultTask {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(RepackageWarFileTask.class);
 
 	@TaskAction
 	public void run() {
@@ -41,6 +45,7 @@ public class RepackageWarFileTask extends DefaultTask {
 	}
 
 	protected void repackageWAR(File warFile, WebAppExtension config) {
+		LOGGER.debug("Repacking WAR file " + warFile.getAbsolutePath());
 		try {
 			Map<String, byte[]> entries = extractEntries(warFile);
 			excludeSourceFiles(entries, config);
@@ -86,6 +91,7 @@ public class RepackageWarFileTask extends DefaultTask {
 			String relativePath = config.toRelativePath(getProject(), jsSourceFile);
 			String matchingEntry = findMatchingEntry(entries, relativePath);
 			if (matchingEntry != null) {
+				LOGGER.debug("Removing web app source file from WAR file: " + matchingEntry);
 				entries.remove(matchingEntry);
 			}
 		}
@@ -95,6 +101,8 @@ public class RepackageWarFileTask extends DefaultTask {
 		File combinedJavaScriptFile = config.getCombinedJavaScriptFile(getProject());
 		String relativePath = config.toBuildRelativePath(getProject(), combinedJavaScriptFile);
 		if (combinedJavaScriptFile.exists() && findMatchingEntry(entries, relativePath) == null) {
+			LOGGER.debug("Including generated web app file into WAR file: " + 
+					combinedJavaScriptFile.getName());
 			entries.put(combinedJavaScriptFile.getName(), readFile(combinedJavaScriptFile));
 		}
 	}
@@ -109,6 +117,7 @@ public class RepackageWarFileTask extends DefaultTask {
 	}
 	
 	private void createWAR(Map<String, byte[]> entries, File warFile) throws IOException {
+		LOGGER.debug("Recreating WAR file " + warFile.getAbsolutePath());
 		warFile.delete();
 
 		ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(warFile));

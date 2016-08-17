@@ -34,7 +34,7 @@ The plugin adds the following properties that can be used to configure these ste
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2016.7'
+    	id 'nl.colorize.gradle.webapp' version '2016.8'
     }
     
     webApp.sourceDir = 'src'

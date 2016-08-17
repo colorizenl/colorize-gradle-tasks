@@ -4,7 +4,14 @@ buildscript {
 	}
 }
 
+apply plugin: 'java'
+apply plugin: 'war'
 apply plugin: 'nl.colorize.gradle.webapp'
 
 webApp.sourceDir = 'resources'
-webApp.buildDir = 'build'
+webApp.buildDir = 'build/web'
+
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+compileJava.options.encoding = 'UTF-8'
+webAppDirName = 'resources'

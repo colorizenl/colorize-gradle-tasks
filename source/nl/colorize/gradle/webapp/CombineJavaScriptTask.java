@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Combines a number of JavaScript files into a single output file. Separate
@@ -25,6 +27,8 @@ import org.gradle.api.tasks.TaskAction;
  * suitable for production to minimize the page's load time.
  */
 public class CombineJavaScriptTask extends DefaultTask {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CombineJavaScriptTask.class);
 	
 	@TaskAction
 	public void run() {
@@ -37,6 +41,9 @@ public class CombineJavaScriptTask extends DefaultTask {
 	}
 
 	protected void createCombinedFile(List<File> jsFiles, File combinedFile, Charset charset) {
+		LOGGER.debug("Combining JavaScript files " + jsFiles);
+		LOGGER.debug("Creating combined JavaScript file " + combinedFile.getAbsolutePath()); 
+		
 		try {
 			PrintWriter writer = new PrintWriter(combinedFile, charset.displayName());
 			for (File jsFile : jsFiles) {

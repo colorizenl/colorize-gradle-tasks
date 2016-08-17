@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Packages the web application by copying all files to the build directory. Note
@@ -25,6 +27,8 @@ import org.gradle.api.tasks.TaskAction;
  * the new combined JavaScript file instead.
  */
 public class PackageWebAppTask extends DefaultTask {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(PackageWebAppTask.class);
 
 	@TaskAction
 	public void run() {
@@ -78,7 +82,8 @@ public class PackageWebAppTask extends DefaultTask {
 	
 	private void rewriteSourceFile(File sourceFile, File outputFile, WebAppExtension config) {
 		config.prepareOutputFile(outputFile);
-		
+
+		LOGGER.debug("Rewriting web app source file " + sourceFile.getAbsolutePath());
 		try {
 			List<String> lines = Files.readAllLines(sourceFile.toPath(), config.getCharsetObject());
 			List<String> rewrittenLines = rewriteSourceFile(lines, config);
