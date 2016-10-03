@@ -57,10 +57,10 @@ public class CombineJavaScriptTask extends DefaultTask {
 
 	private List<File> getOrderedJavaScriptFiles(WebAppExtension config) {
 		List<File> jsFiles = config.findJavaScriptFiles(getProject());
-		return getOrderedJavaScriptFiles(jsFiles, config);
+		return getOrderedJavaScriptFiles(jsFiles);
 	}
 
-	protected List<File> getOrderedJavaScriptFiles(List<File> jsFiles, WebAppExtension config) {
+	protected List<File> getOrderedJavaScriptFiles(List<File> jsFiles) {
 		List<File> ordered = new ArrayList<>();
 		ordered.addAll(jsFiles);
 		Collections.sort(ordered, new LibrariesFirstComparator());

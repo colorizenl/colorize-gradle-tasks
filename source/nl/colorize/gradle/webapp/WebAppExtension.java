@@ -7,6 +7,7 @@
 package nl.colorize.gradle.webapp;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ public class WebAppExtension {
 	private List<String> excludedJavaScriptFiles;
 	private boolean combineJavaScriptLibraries;
 	private String charset;
+	private List<String> syncDirs;
 	
 	public static final List<String> JAVASCRIPT_LIBRARY_DIRECTORIES = Arrays.asList(
 				"/lib/", "/node_modules/", "/bower_components/");
@@ -41,6 +43,7 @@ public class WebAppExtension {
 		excludedJavaScriptFiles = new ArrayList<>();
 		combineJavaScriptLibraries = false;
 		charset = "UTF-8";
+		syncDirs = new ArrayList<>();
 	}
 	
 	public void setSourceDir(String sourceDir) {
@@ -115,6 +118,14 @@ public class WebAppExtension {
 		return Charset.forName(charset);
 	}
 	
+	public void setSyncDirs(List<String> syncDirs) {
+		this.syncDirs = syncDirs;
+	}
+	
+	public List<String> getSyncDirs() {
+		return syncDirs;
+	}
+
 	/**
 	 * Returns the path of the specified file relative to the project directory.
 	 * @throws IllegalArgumentException if the file is located in a directory
@@ -133,14 +144,18 @@ public class WebAppExtension {
 		return toRelativePath(sourceFile, project.getBuildDir());
 	}
 	
-	private String toRelativePath(File sourceFile, File dir) {
-		String sourceFilePath = sourceFile.getAbsolutePath();
-		String dirPath = dir.getAbsolutePath();
-		if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
-			throw new IllegalArgumentException("File " + sourceFilePath + 
-					" is located outside of source directory");
+	public String toRelativePath(File sourceFile, File dir) {
+		try {
+			String sourceFilePath = sourceFile.toPath().toRealPath().toAbsolutePath().toString();
+			String dirPath = dir.toPath().toRealPath().toAbsolutePath().toString();
+			if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
+				throw new IllegalArgumentException("File " + sourceFilePath + 
+						" is located outside of source directory " + dirPath);
+			}
+			return sourceFilePath.substring(dirPath.length() + 1);
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot determine directory path", e);
 		}
-		return sourceFilePath.substring(dirPath.length() + 1);
 	}
 	
 	public void prepareOutputFile(File outputFile) {

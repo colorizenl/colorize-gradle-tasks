@@ -20,7 +20,7 @@ The plugin adds the following properties that can be used to configure these ste
   - **sourceDir**: Source directory that contains the HTML/CSS/JavaScript files. The default
     location is `web` (relative to the project directory).
   - **buildDir**: Destination directory for the packages web application. The default location is
-    `build/web` (relative to the project directory).
+    `build/web` (relative to the project directory). 
   - **combinedJavaScriptFileName**: File name for the JavaScript file that is created during the
     build by combining all JavaScript source files. The default name is `combined.js`.
   - **excludedJavaScriptFiles**: List of patterns for JavaScript files that should be ignored
@@ -30,11 +30,13 @@ The plugin adds the following properties that can be used to configure these ste
     `lib/`, `node_modules/`, `bower_components/`). The default value is `false`.
   - **charset**: Character encoding that is used to read and write text files. The default value
     is UTF-8.
+  - **syncDirs**: The packages web application can optionally be synchronized to a list of
+    other locations. 
     
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2016.8'
+    	id 'nl.colorize.gradle.webapp' version '2016.9'
     }
     
     webApp.sourceDir = 'src'

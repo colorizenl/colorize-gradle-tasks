@@ -10,6 +10,7 @@ apply plugin: 'nl.colorize.gradle.webapp'
 
 webApp.sourceDir = 'resources'
 webApp.buildDir = 'build/web'
+webApp.syncDirs = ['build/a', 'build/b']
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
