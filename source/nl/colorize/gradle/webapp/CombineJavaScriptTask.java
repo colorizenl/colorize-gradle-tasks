@@ -9,7 +9,6 @@ package nl.colorize.gradle.webapp;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +19,8 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import groovy.lang.Closure;
 
 /**
  * Combines a number of JavaScript files into a single output file. Separate
@@ -37,17 +38,17 @@ public class CombineJavaScriptTask extends DefaultTask {
 		File combinedFile = config.getCombinedJavaScriptFile(getProject());
 		config.prepareOutputFile(combinedFile);
 
-		createCombinedFile(jsFiles, combinedFile, config.getCharsetObject());
+		createCombinedFile(jsFiles, combinedFile, config);
 	}
 
-	protected void createCombinedFile(List<File> jsFiles, File combinedFile, Charset charset) {
+	protected void createCombinedFile(List<File> jsFiles, File combinedFile, WebAppExtension config) {
 		LOGGER.debug("Combining JavaScript files " + jsFiles);
 		LOGGER.debug("Creating combined JavaScript file " + combinedFile.getAbsolutePath()); 
 		
 		try {
-			PrintWriter writer = new PrintWriter(combinedFile, charset.displayName());
+			PrintWriter writer = new PrintWriter(combinedFile, config.getCharset());
 			for (File jsFile : jsFiles) {
-				appendFile(jsFile, writer, charset);
+				appendFile(jsFile, writer, config);
 			}
 			writer.close();
 		} catch (IOException e) {
@@ -67,9 +68,14 @@ public class CombineJavaScriptTask extends DefaultTask {
 		return ordered;
 	}
 
-	private void appendFile(File jsFile, PrintWriter writer, Charset charset) throws IOException {
-		List<String> lines = Files.readAllLines(jsFile.toPath(), charset);
+	private void appendFile(File jsFile, PrintWriter writer, WebAppExtension config) throws IOException {
+		List<String> lines = Files.readAllLines(jsFile.toPath(), config.getCharsetObject());
+		Closure<String> filter = config.getRewriteJavaScriptFilter();
+		
 		for (String line : lines) {
+			if (filter != null) {
+				line = filter.call(line);
+			}
 			writer.println(line);
 		}
 	}

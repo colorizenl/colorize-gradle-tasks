@@ -51,9 +51,11 @@ public class WebAppPlugin implements Plugin<Project> {
 	private void initTasks(TaskContainer tasks) {
 		tasks.create("combineJavaScript", CombineJavaScriptTask.class);
 		tasks.create("packageWebApp", PackageWebAppTask.class);
+		tasks.create("syncWebApp", SyncWebAppTask.class);
 		
-		tasks.getByName("assemble").dependsOn("packageWebApp");
 		tasks.getByName("packageWebApp").dependsOn("combineJavaScript");
+		tasks.getByName("syncWebApp").dependsOn("packageWebApp");
+		tasks.getByName("assemble").dependsOn("packageWebApp", "syncWebApp");
 	}
 	
 	private boolean hasTask(Project project, String taskName) {

@@ -28,6 +28,8 @@ The plugin adds the following properties that can be used to configure these ste
   - **combineJavaScriptLibraries**: Sets if JavaScript libraries should also be included in the
     combined JavaScript file. Detection of library files is based on directory structure (i.e.
     `lib/`, `node_modules/`, `bower_components/`). The default value is `false`.
+  - **rewriteJavaScriptFilter**: Takes a closure that can optionally rewrite lines when combining
+    the JavaScript files. 
   - **charset**: Character encoding that is used to read and write text files. The default value
     is UTF-8.
   - **syncDirs**: The packages web application can optionally be synchronized to a list of
@@ -36,11 +38,13 @@ The plugin adds the following properties that can be used to configure these ste
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2016.9'
+    	id 'nl.colorize.gradle.webapp' version '2016.11'
     }
     
     webApp.sourceDir = 'src'
     webApp.buildDir = 'build'
+    webApp.combinedJavaScriptFileName = 'my-app-' + version + '.js'
+    webApp.rewriteJavaScriptFilter = { line -> line.replace('first', 'first test'); }
 
 License
 -------

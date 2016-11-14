@@ -56,28 +56,6 @@ public class TestPackageWebAppTask {
 		assertFalse(new File(tempDir, "test.txt").exists());
 	}
 	
-	@Test
-	public void testSyncPackagedWebAppToDirs() throws Exception {
-		File syncSourceDir = new File(System.getProperty("java.io.tmpdir") + "/sync-source");
-		syncSourceDir.mkdir();
-		Files.write(new File(syncSourceDir, "a.txt").toPath(), Arrays.asList("test"), Charset.forName("UTF-8"));
-		Files.write(new File(syncSourceDir, "b.txt").toPath(), Arrays.asList("test"), Charset.forName("UTF-8"));
-		
-		File syncDestDir = new File(System.getProperty("java.io.tmpdir") + "/sync-dest");
-		syncDestDir.mkdir();
-		Files.write(new File(syncDestDir, "b.txt").toPath(), Arrays.asList("test"), Charset.forName("UTF-8"));
-		Files.write(new File(syncDestDir, "c.txt").toPath(), Arrays.asList("test"), Charset.forName("UTF-8"));
-		
-		PackageWebAppTask task = createTask();
-		WebAppExtension config = task.getProject().getExtensions().getByType(WebAppExtension.class);
-		task.sync(syncSourceDir, syncDestDir, config);
-		
-		File[] contents = syncDestDir.listFiles();
-		assertEquals(2, contents.length);
-		assertEquals("a.txt", contents[0].getName());
-		assertEquals("b.txt", contents[1].getName());
-	}
-	
 	private PackageWebAppTask createTask() {
 		Project project = ProjectBuilder.builder().withProjectDir(new File("testbuild")).build();
 		WebAppPlugin plugin = new WebAppPlugin();

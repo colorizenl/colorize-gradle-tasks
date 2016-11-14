@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.gradle.api.Project;
 import org.gradle.internal.impldep.com.google.common.io.Files;
 import org.gradle.testfixtures.ProjectBuilder;
@@ -27,6 +28,8 @@ public class TestCombineJavaScriptTask {
 	
 	@Test
 	public void testWriteCombinedFile() throws Exception {
+		WebAppExtension config = new WebAppExtension();
+		
 		File firstFile = File.createTempFile("first", ".js");
 		Files.write("first\n1", firstFile, CHARSET);
 		
@@ -34,7 +37,7 @@ public class TestCombineJavaScriptTask {
 		Files.write("second\n2", secondFile, CHARSET);
 		
 		File combinedFile = File.createTempFile("combined", ".js");
-		createTask().createCombinedFile(Arrays.asList(firstFile, secondFile), combinedFile, CHARSET);
+		createTask().createCombinedFile(Arrays.asList(firstFile, secondFile), combinedFile, config);
 		List<String> lines = Files.readLines(combinedFile, CHARSET);
 		
 		assertEquals(4, lines.size());
@@ -79,6 +82,25 @@ public class TestCombineJavaScriptTask {
 		assertEquals("second.js", jsFiles.get(0).getName());
 	}
 	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testRewriteJavaScriptFilter() throws Exception {
+		WebAppExtension config = new WebAppExtension();
+		config.setRewriteJavaScriptFilter(new MethodClosure(this, "rewriteJavaScriptLine"));
+		
+		File testFile = File.createTempFile("first", ".js");
+		Files.write("first\nsecond\nthird\n", testFile, CHARSET);
+		
+		File combinedFile = File.createTempFile("combined", ".js");
+		createTask().createCombinedFile(Arrays.asList(testFile), combinedFile, config);
+		List<String> lines = Files.readLines(combinedFile, CHARSET);
+		
+		assertEquals(3, lines.size());
+		assertEquals("first", lines.get(0));
+		assertEquals("2", lines.get(1));
+		assertEquals("third", lines.get(2));
+	}
+	
 	private Project createProject() {
 		return ProjectBuilder.builder().withProjectDir(new File("testbuild")).build();
 	}
@@ -87,5 +109,9 @@ public class TestCombineJavaScriptTask {
 		Project project = createProject();
 		new WebAppPlugin().apply(project);
 		return (CombineJavaScriptTask) project.getTasks().getByName("combineJavaScript");
+	}
+	
+	protected String rewriteJavaScriptLine(String line) {
+		return line.replace("second", "2");
 	}
 }

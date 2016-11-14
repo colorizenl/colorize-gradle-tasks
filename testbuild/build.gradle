@@ -10,6 +10,7 @@ apply plugin: 'nl.colorize.gradle.webapp'
 
 webApp.sourceDir = 'resources'
 webApp.buildDir = 'build/web'
+webApp.rewriteJavaScriptFilter = { line -> line.replace('first', 'first test'); }
 webApp.syncDirs = ['build/a', 'build/b']
 
 sourceCompatibility = '1.7'

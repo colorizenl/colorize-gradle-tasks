@@ -46,10 +46,6 @@ public class PackageWebAppTask extends DefaultTask {
 				copyFile(sourceFile, outputFile, config);
 			}
 		}
-		
-		for (String syncDir : config.getSyncDirs()) {
-			sync(buildDir, getProject().file(syncDir), config);
-		}
 	}
 	
 	protected void cleanBuildDir(File buildDir, WebAppExtension config) {
@@ -142,27 +138,5 @@ public class PackageWebAppTask extends DefaultTask {
 	private boolean isJavaScriptSourceFileReference(String line, String sourceFile) {
 		return line.trim().startsWith("<script ") && line.contains(" src=\"") && 
 				line.toLowerCase().contains(sourceFile.toLowerCase());
-	}
-	
-	protected void sync(File buildDir, File syncDir, WebAppExtension config) {
-		if (!syncDir.exists()) {
-			syncDir.mkdir();
-		}
-		
-		for (File existingFile : getProject().fileTree(syncDir)) {
-			existingFile.delete();
-		}
-		
-		for (File sourceFile : getProject().fileTree(buildDir)) {
-			File outputFile = new File(syncDir.getAbsolutePath() + "/" + 
-					config.toRelativePath(sourceFile, buildDir));
-			try {
-				config.prepareOutputFile(outputFile);
-				Files.copy(sourceFile.toPath(), outputFile.toPath());
-			} catch (IOException e) {
-				throw new RuntimeException("Cannot sync file from " + sourceFile.getAbsolutePath() + 
-						" to " + outputFile.getAbsolutePath(), e);
-			}
-		}
 	}
 }

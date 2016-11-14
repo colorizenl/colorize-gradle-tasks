@@ -67,7 +67,8 @@ public class RepackageWarFileTask extends DefaultTask {
 		
 		while (entries.hasMoreElements()) {
 			ZipEntry entry = entries.nextElement();
-			contents.put(entry.getName(), extractEntryContents(zipFile, entry));
+			String path = normalizeEntryPath(entry.getName(), warFile);
+			contents.put(path, extractEntryContents(zipFile, entry));
 		}
 		
 		zipFile.close();
@@ -75,6 +76,15 @@ public class RepackageWarFileTask extends DefaultTask {
 		return contents;
 	}
 	
+	private String normalizeEntryPath(String entryName, File warFile) {
+		if (entryName.contains("Users/") || entryName.contains(":\\")) {
+			LOGGER.warn("WAR file " + warFile.getName() + " contains entry with absolute " + 
+					"path that cannot be preserved while repackaging: " + entryName);
+			return entryName.substring(entryName.replace("\\", "/").lastIndexOf('/') + 1);
+		}
+		return entryName;
+	}
+
 	private byte[] extractEntryContents(ZipFile zipFile, ZipEntry entry) throws IOException {
 		if (entry.isDirectory()) {
 			return new byte[0];

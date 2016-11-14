@@ -7,7 +7,6 @@
 package nl.colorize.gradle.webapp;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +14,8 @@ import java.util.List;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileTree;
+
+import groovy.lang.Closure;
 
 /**
  * Configuration for the web application, including the locations of the source
@@ -27,6 +28,7 @@ public class WebAppExtension {
 	private String combinedJavaScriptFileName;
 	private List<String> excludedJavaScriptFiles;
 	private boolean combineJavaScriptLibraries;
+	private Closure<String> rewriteJavaScriptFilter;
 	private String charset;
 	private List<String> syncDirs;
 	
@@ -105,6 +107,14 @@ public class WebAppExtension {
 	public boolean getCombineJavaScriptLibraries() {
 		return combineJavaScriptLibraries;
 	}
+	
+	public Closure<String> getRewriteJavaScriptFilter() {
+		return rewriteJavaScriptFilter;
+	}
+	
+	public void setRewriteJavaScriptFilter(Closure<String> rewriteJavaScriptFilter) {
+		this.rewriteJavaScriptFilter = rewriteJavaScriptFilter;
+	}
 
 	public void setCharset(String charset) {
 		this.charset = charset;
@@ -145,17 +155,13 @@ public class WebAppExtension {
 	}
 	
 	public String toRelativePath(File sourceFile, File dir) {
-		try {
-			String sourceFilePath = sourceFile.toPath().toRealPath().toAbsolutePath().toString();
-			String dirPath = dir.toPath().toRealPath().toAbsolutePath().toString();
-			if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
-				throw new IllegalArgumentException("File " + sourceFilePath + 
-						" is located outside of source directory " + dirPath);
-			}
-			return sourceFilePath.substring(dirPath.length() + 1);
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot determine directory path", e);
+		String sourceFilePath = sourceFile.getAbsolutePath();
+		String dirPath = dir.getAbsolutePath();
+		if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
+			throw new IllegalArgumentException("File " + sourceFilePath + 
+					" is located outside of source directory " + dirPath);
 		}
+		return sourceFilePath.substring(dirPath.length() + 1);
 	}
 	
 	public void prepareOutputFile(File outputFile) {
