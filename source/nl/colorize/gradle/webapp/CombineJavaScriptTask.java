@@ -58,13 +58,13 @@ public class CombineJavaScriptTask extends DefaultTask {
 
 	private List<File> getOrderedJavaScriptFiles(WebAppExtension config) {
 		List<File> jsFiles = config.findJavaScriptFiles(getProject());
-		return getOrderedJavaScriptFiles(jsFiles);
+		return getOrderedJavaScriptFiles(config, jsFiles);
 	}
 
-	protected List<File> getOrderedJavaScriptFiles(List<File> jsFiles) {
+	protected List<File> getOrderedJavaScriptFiles(WebAppExtension config, List<File> jsFiles) {
 		List<File> ordered = new ArrayList<>();
 		ordered.addAll(jsFiles);
-		Collections.sort(ordered, new LibrariesFirstComparator());
+		Collections.sort(ordered, new LibrariesFirstComparator(config));
 		return ordered;
 	}
 
@@ -88,9 +88,15 @@ public class CombineJavaScriptTask extends DefaultTask {
 	 */
 	private static class LibrariesFirstComparator implements Comparator<File> {
 		
+		private WebAppExtension config;
+		
+		public LibrariesFirstComparator(WebAppExtension config) {
+			this.config = config;
+		}
+
 		public int compare(File a, File b) {
-			boolean aIsLibrary = isLibrary(a);
-			boolean bIsLibrary = isLibrary(b);
+			boolean aIsLibrary = config.isJavaScriptLibrary(a);
+			boolean bIsLibrary = config.isJavaScriptLibrary(b);
 			
 			if (aIsLibrary && !bIsLibrary) {
 				return -1;
@@ -99,15 +105,6 @@ public class CombineJavaScriptTask extends DefaultTask {
 			} else {
 				return a.getAbsolutePath().compareTo(b.getAbsolutePath());
 			}
-		}
-		
-		private boolean isLibrary(File jsFile) {
-			for (String libDir : WebAppExtension.JAVASCRIPT_LIBRARY_DIRECTORIES) {
-				if (jsFile.getAbsolutePath().contains(libDir)) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 }

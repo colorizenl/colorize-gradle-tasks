@@ -6,7 +6,6 @@
 
 package nl.colorize.gradle.webapp;
 
-import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
@@ -73,12 +72,8 @@ public class WebAppPlugin implements Plugin<Project> {
 	 */
 	private void integrateWithWarPlugin(final TaskContainer tasks) {
 		tasks.create("repackageWAR", RepackageWarFileTask.class);
-		tasks.getByName("war").dependsOn("packageWebApp");
-		tasks.getByName("war").doLast(new Action<Object>() {
-			public void execute(Object context) {
-				((RepackageWarFileTask) tasks.getByName("repackageWAR")).execute();
-			}
-		});
+		tasks.getByName("repackageWAR").dependsOn("war", "packageWebApp");
+		tasks.getByName("assemble").dependsOn("repackageWAR");
 	}
 	
 	private void integrateWithClientLibrariesPlugin(TaskContainer tasks) {

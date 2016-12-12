@@ -56,6 +56,16 @@ public class TestPackageWebAppTask {
 		assertFalse(new File(tempDir, "test.txt").exists());
 	}
 	
+	@Test
+	public void testShouldCopySourceFile() {
+		PackageWebAppTask task = createTask();
+		WebAppExtension config = task.getProject().getExtensions().getByType(WebAppExtension.class);
+		
+		assertFalse(task.shouldCopySourceFile(new File("/tmp/test.js"), config));
+		assertTrue(task.shouldCopySourceFile(new File("/tmp/lib/test.js"), config));
+		assertTrue(task.shouldCopySourceFile(new File("/tmp/node_modules/test.js"), config));
+	}
+	
 	private PackageWebAppTask createTask() {
 		Project project = ProjectBuilder.builder().withProjectDir(new File("testbuild")).build();
 		WebAppPlugin plugin = new WebAppPlugin();

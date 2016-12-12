@@ -7,6 +7,7 @@
 package nl.colorize.gradle.webapp;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +33,11 @@ public class WebAppExtension {
 	private String charset;
 	private List<String> syncDirs;
 	
-	public static final List<String> JAVASCRIPT_LIBRARY_DIRECTORIES = Arrays.asList(
-				"/lib/", "/node_modules/", "/bower_components/");
+	private static final List<String> JAVASCRIPT_LIBRARY_DIRECTORIES = Arrays.asList(
+			"**/lib/**", "**/node_modules/**", "**/bower_components/**");
 	
 	private static final List<String> DEFAULT_JAVASCRIPT_EXCLUDES = Arrays.asList(
-			"index.js", "*.bundle.js");
+			"**/index.js", "**/*.min.js", "**/*.bundle.js");
 	
 	public WebAppExtension() {
 		sourceDir = "web";
@@ -86,18 +87,6 @@ public class WebAppExtension {
 	
 	public void setExcludedJavaScriptFiles(List<String> excludedJavaScriptFiles) {
 		this.excludedJavaScriptFiles = excludedJavaScriptFiles;
-	}
-	
-	public List<String> getExcludedJavaScriptFiles() {
-		List<String> excluded = new ArrayList<>();
-		excluded.addAll(excludedJavaScriptFiles);
-		excluded.addAll(DEFAULT_JAVASCRIPT_EXCLUDES);
-		if (!combineJavaScriptLibraries) {
-			for (String jsLibDir : JAVASCRIPT_LIBRARY_DIRECTORIES) {
-				excluded.add("**" + jsLibDir + "**");
-			}
-		}
-		return excluded;
 	}
 	
 	public void setCombineJavaScriptLibraries(boolean combineJavaScriptLibraries) {
@@ -157,11 +146,20 @@ public class WebAppExtension {
 	public String toRelativePath(File sourceFile, File dir) {
 		String sourceFilePath = sourceFile.getAbsolutePath();
 		String dirPath = dir.getAbsolutePath();
-		if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
-			throw new IllegalArgumentException("File " + sourceFilePath + 
-					" is located outside of source directory " + dirPath);
+		
+		try {
+			if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
+				sourceFilePath = sourceFile.getCanonicalFile().getAbsolutePath();
+				dirPath = dir.getCanonicalFile().getAbsolutePath();
+				if (!sourceFilePath.startsWith(dirPath) || sourceFilePath.equals(dirPath)) {
+					throw new IllegalArgumentException("File " + sourceFilePath + 
+							" is located outside of source directory " + dirPath);
+				}
+			}
+			return sourceFilePath.substring(dirPath.length() + 1);
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot determine relative path for " + sourceFile.getName());
 		}
-		return sourceFilePath.substring(dirPath.length() + 1);
 	}
 	
 	public void prepareOutputFile(File outputFile) {
@@ -184,5 +182,27 @@ public class WebAppExtension {
 		List<File> jsFiles = new ArrayList<>();
 		jsFiles.addAll(fileTree.getFiles());
 		return jsFiles;
+	}
+	
+	private List<String> getExcludedJavaScriptFiles() {
+		List<String> excluded = new ArrayList<>();
+		excluded.addAll(excludedJavaScriptFiles);
+		excluded.addAll(DEFAULT_JAVASCRIPT_EXCLUDES);
+		if (!combineJavaScriptLibraries) {
+			for (String jsLibDir : JAVASCRIPT_LIBRARY_DIRECTORIES) {
+				excluded.add(jsLibDir);
+			}
+		}
+		return excluded;
+	}
+	
+	public boolean isJavaScriptLibrary(File file) {
+		for (String jsLibDir : JAVASCRIPT_LIBRARY_DIRECTORIES) {
+			if (file.getName().endsWith(".js") &&
+					file.getAbsolutePath().contains(jsLibDir.replace("*", ""))) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

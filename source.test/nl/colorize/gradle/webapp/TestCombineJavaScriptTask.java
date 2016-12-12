@@ -54,7 +54,8 @@ public class TestCombineJavaScriptTask {
 				new File("/tmp/subdir/e.js"), new File("/tmp/subdir/f.js"));
 		
 		CombineJavaScriptTask task = createTask();
-		List<File> ordered = task.getOrderedJavaScriptFiles(files);
+		WebAppExtension config = task.getProject().getExtensions().getByType(WebAppExtension.class);
+		List<File> ordered = task.getOrderedJavaScriptFiles(config, files);
 		
 		assertEquals(6, ordered.size());
 		assertEquals("c.js", ordered.get(0).getName());

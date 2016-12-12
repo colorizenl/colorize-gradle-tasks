@@ -61,9 +61,13 @@ public class PackageWebAppTask extends DefaultTask {
 		});
 	}
 
-	private boolean shouldCopySourceFile(File sourceFile, WebAppExtension config) {
-		List<File> jsSourceFiles = config.findJavaScriptFiles(getProject());
-		return !jsSourceFiles.contains(sourceFile);
+	protected boolean shouldCopySourceFile(File sourceFile, WebAppExtension config) {
+		if (sourceFile.getName().endsWith(".js")) {
+			return !config.getCombinedJavaScriptFileName().equals(sourceFile.getName()) &&
+					(!config.getCombineJavaScriptLibraries() && config.isJavaScriptLibrary(sourceFile));
+		} else {
+			return true;
+		}
 	}
 	
 	private boolean shouldRewriteSourceFile(File sourceFile) {
