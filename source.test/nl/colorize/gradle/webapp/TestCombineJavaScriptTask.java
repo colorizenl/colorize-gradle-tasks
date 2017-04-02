@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Colorize Gradle tasks
-// Copyright 2010-2016 Colorize
+// Copyright 2010-2017 Colorize
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ public class TestCombineJavaScriptTask {
 		assertEquals("first.js", jsFiles.get(0).getName());
 		assertEquals("second.js", jsFiles.get(1).getName());
 		
-		config.setExcludedJavaScriptFiles(Arrays.asList("*fir*"));
+		config.setExcludes(Arrays.asList("*fir*"));
 		jsFiles = config.findJavaScriptFiles(project);
 		
 		assertEquals(1, jsFiles.size());

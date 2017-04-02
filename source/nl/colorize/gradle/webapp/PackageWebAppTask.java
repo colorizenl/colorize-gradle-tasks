@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Colorize Gradle tasks
-// Copyright 2010-2016 Colorize
+// Copyright 2010-2017 Colorize
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ public class PackageWebAppTask extends DefaultTask {
 		File buildDir = config.getBuildDir(getProject());
 		cleanBuildDir(buildDir, config);
 		
-		for (File sourceFile : config.getSourceTree(getProject()).getFiles()) {
+		for (File sourceFile : config.findWebAppFiles(getProject())) {
 			File outputFile = new File(buildDir.getAbsolutePath() + "/" + 
 					config.toRelativePath(getProject(), sourceFile));
 			
@@ -63,8 +63,10 @@ public class PackageWebAppTask extends DefaultTask {
 
 	protected boolean shouldCopySourceFile(File sourceFile, WebAppExtension config) {
 		if (sourceFile.getName().endsWith(".js")) {
-			return !config.getCombinedJavaScriptFileName().equals(sourceFile.getName()) &&
-					(!config.getCombineJavaScriptLibraries() && config.isJavaScriptLibrary(sourceFile));
+			boolean isGenerated = config.getCombinedJavaScriptFileName().equals(sourceFile.getName());
+			boolean isLibrary = config.isJavaScriptLibrary(sourceFile);
+			
+			return !isGenerated && (!config.getCombineJavaScriptLibraries() && isLibrary);
 		} else {
 			return true;
 		}

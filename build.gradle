@@ -12,19 +12,26 @@ buildscript {
 
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'com.gradle.plugin-publish'
+apply plugin: 'jacoco'
 apply plugin: 'eclipse'
 
-version = '2016.13'
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+group = 'nl.colorize'
+version = '2017.1'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 compileJava.options.encoding = 'UTF-8'
 sourceSets.main.java.srcDirs = ['source']
 sourceSets.test.java.srcDirs = ['source.test']
 jar.archiveName = "colorize-gradle-tasks-${version}.jar"
 
+repositories {
+	mavenCentral()
+}
+
 dependencies {
 	compile gradleApi()
 	compile localGroovy()
+	testCompile 'junit:junit:4.12'
 }
 
 jar.doLast {
@@ -33,6 +40,10 @@ jar.doLast {
 		into "${buildDir}/libs"
 		rename jar.archiveName, 'colorize-gradle-tasks.jar'
 	}
+}
+
+test.doLast {
+	tasks.jacocoTestReport.execute()
 }
 
 gradlePlugin {

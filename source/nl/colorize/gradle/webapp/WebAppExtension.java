@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Colorize Gradle tasks
-// Copyright 2010-2016 Colorize
+// Copyright 2010-2017 Colorize
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
@@ -27,23 +27,29 @@ public class WebAppExtension {
 	private String sourceDir;
 	private String buildDir;
 	private String combinedJavaScriptFileName;
-	private List<String> excludedJavaScriptFiles;
+	private List<String> excludes;
 	private boolean combineJavaScriptLibraries;
 	private Closure<String> rewriteJavaScriptFilter;
 	private String charset;
 	private List<String> syncDirs;
 	
 	private static final List<String> JAVASCRIPT_LIBRARY_DIRECTORIES = Arrays.asList(
-			"**/lib/**", "**/node_modules/**", "**/bower_components/**");
+			"**/lib/**", 
+			"**/node_modules/**", 
+			"**/bower_components/**");
 	
-	private static final List<String> DEFAULT_JAVASCRIPT_EXCLUDES = Arrays.asList(
-			"**/index.js", "**/*.min.js", "**/*.bundle.js");
+	private static final List<String> DEFAULT_EXCLUDES = Arrays.asList(
+			"**/index.js", 
+			"**/*.min.js", 
+			"**/*.bundle.js",
+			"Gruntfile.js",
+			"gulpfile.js");
 	
 	public WebAppExtension() {
 		sourceDir = "web";
 		buildDir = "build/web";
 		combinedJavaScriptFileName = "combined.js";
-		excludedJavaScriptFiles = new ArrayList<>();
+		excludes = new ArrayList<>();
 		combineJavaScriptLibraries = false;
 		charset = "UTF-8";
 		syncDirs = new ArrayList<>();
@@ -55,10 +61,6 @@ public class WebAppExtension {
 	
 	public String getSourceDir() {
 		return sourceDir;
-	}
-	
-	public ConfigurableFileTree getSourceTree(Project project) {
-		return project.fileTree(sourceDir);
 	}
 	
 	public void setBuildDir(String buildDir) {
@@ -85,8 +87,12 @@ public class WebAppExtension {
 		return new File(getBuildDir(project), combinedJavaScriptFileName);
 	}
 	
-	public void setExcludedJavaScriptFiles(List<String> excludedJavaScriptFiles) {
-		this.excludedJavaScriptFiles = excludedJavaScriptFiles;
+	public List<String> getExcludes() {
+		return excludes;
+	}
+	
+	public void setExcludes(List<String> excludes) {
+		this.excludes = excludes;
 	}
 	
 	public void setCombineJavaScriptLibraries(boolean combineJavaScriptLibraries) {
@@ -170,24 +176,34 @@ public class WebAppExtension {
 	}
 	
 	/**
-	 * Finds all JavaScript source files in the specified project. The returned
-	 * list will not contain any JavaScript files produced by the build itself,
-	 * or files that have been excluded.
+	 * Finds all web application files in the project that are in scope according
+	 * to this configuration. Note that this includes JavaScript files. 
+	 */
+	public List<File> findWebAppFiles(Project project) {
+		ConfigurableFileTree fileTree = project.fileTree(sourceDir);
+		fileTree.exclude(DEFAULT_EXCLUDES);
+		fileTree.exclude(excludes);
+		
+		return new ArrayList<File>(fileTree.getFiles());
+	}
+	
+	/**
+	 * Finds all JavaScript source files in the project that are in scope according
+	 * to this configuration. The returned list will not contain any JavaScript 
+	 * files produced by the build itself, or files that have been excluded.
 	 */
 	public List<File> findJavaScriptFiles(Project project) {
 		ConfigurableFileTree fileTree = project.fileTree(sourceDir);
 		fileTree.include("**/*.js");
 		fileTree.exclude(getExcludedJavaScriptFiles());
 		
-		List<File> jsFiles = new ArrayList<>();
-		jsFiles.addAll(fileTree.getFiles());
-		return jsFiles;
+		return new ArrayList<File>(fileTree.getFiles());
 	}
 	
 	private List<String> getExcludedJavaScriptFiles() {
 		List<String> excluded = new ArrayList<>();
-		excluded.addAll(excludedJavaScriptFiles);
-		excluded.addAll(DEFAULT_JAVASCRIPT_EXCLUDES);
+		excluded.addAll(DEFAULT_EXCLUDES);
+		excluded.addAll(excludes);
 		if (!combineJavaScriptLibraries) {
 			for (String jsLibDir : JAVASCRIPT_LIBRARY_DIRECTORIES) {
 				excluded.add(jsLibDir);

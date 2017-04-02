@@ -8,12 +8,13 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'nl.colorize.gradle.webapp'
 
-webApp.sourceDir = 'resources'
-webApp.buildDir = 'build/web'
-webApp.rewriteJavaScriptFilter = { line -> line.replace('first', 'first test'); }
-webApp.syncDirs = ['build/a', 'build/b']
-
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 compileJava.options.encoding = 'UTF-8'
 webAppDirName = 'resources'
+
+webApp.sourceDir = 'resources'
+webApp.buildDir = 'build/web'
+webApp.rewriteJavaScriptFilter = { line -> line.replace('first', 'first test'); }
+webApp.excludes = ['*.war']
+webApp.syncDirs = ['build/a', 'build/b']

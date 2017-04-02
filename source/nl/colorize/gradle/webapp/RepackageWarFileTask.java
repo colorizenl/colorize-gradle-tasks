@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // Colorize Gradle tasks
-// Copyright 2010-2016 Colorize
+// Copyright 2010-2017 Colorize
 // Apache license (http://www.colorize.nl/code_license.txt)
 //-----------------------------------------------------------------------------
 
