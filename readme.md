@@ -38,15 +38,15 @@ Configuration
   
 The plugin can be configured using the following properties:
 
-Property | Description | Default value
---------------------------------------
-sourceDir | Source directory that contains the HTML/CSS/JavaScript files. The directory path is relative to the project directory. | web
-buildDir | Destination directory for the packaged web application. The directory path is relative to the project directory. | build/web
-combinedJavaScriptFileName | File name for the JavaScript file that is created during the build by combining all JavaScript source files. | combined.js
-excludes | List of exclude patterns (e.g. `['gulpfile.js', '*.map']`) of files that should not be included in the packaged web application. | (none)
-combineJavaScriptLibraries | Configures if JavaScript libraries should also be included in the combined JavaScript file. Detection of library files is based on directory structure (i.e. `lib/`, `node_modules/`, `bower_components/`). | false
-charset | Character encoding that is used to read and write text files. | UTF-8
-syncDirs | The packages web application can optionally be synchronized to a list of other locations. | (none)
+| Property | Description | Default |
+|----------|-------------|---------|
+| sourceDir | Source directory that contains the HTML/CSS/JavaScript files. The directory path is relative to the project directory. | web |
+| buildDir | Destination directory for the packaged web application. The directory path is relative to the project directory. | build/web |
+| combinedJavaScriptFileName | File name for the JavaScript file that is created during the build by combining all JavaScript source files. | combined.js |
+| excludes | List of exclude patterns (e.g. `['gulpfile.js', '*.map']`) of files that should not be included in the packaged web application. | (none) |
+| combineJavaScriptLibraries | Configures if JavaScript libraries should also be included in the combined JavaScript file. Detection of library files is based on directory structure (i.e. `lib/`, `node_modules/`, `bower_components/`). | false |
+| charset | Character encoding that is used to read and write text files. | UTF-8 |
+| syncDirs | The packages web application can optionally be synchronized to a list of other locations. | (none) |
     
 Build
 -----
