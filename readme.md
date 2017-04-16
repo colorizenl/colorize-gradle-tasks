@@ -5,10 +5,10 @@ Gradle plugin for building HTML/CSS/JavaScript web applications. The plugin adds
 *packageWebApp* task that automatically runs as part of *assemble*. "Packaging" the web 
 application consists of the following steps:
 
-  - Combine all JavaScript sources files into a single combined JavaScript file.
+  - Combine all JavaScript files into a single combined JavaScript file.
   - Rewrite all references to the original JavaScript source files to reference the combined
     JavaScript file instead.
-  - The resulting HTML, CSS, and JavaScript files are copied to the `build/web` directory.
+  - The resulting HTML, CSS, and JavaScript files are copied to the build directory.
   - If the *war* plugin is also used in the same project to build Java web applications, the 
     packaged web application will also be included in the WAR file.
   - If the [client dependencies plugin](https://github.com/craigburke/client-dependencies-gradle)
@@ -21,7 +21,7 @@ Usage
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2017.1'
+    	id 'nl.colorize.gradle.webapp' version '2017.2'
     }
     
     webApp.sourceDir = 'src'

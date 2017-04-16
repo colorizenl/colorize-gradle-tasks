@@ -10,8 +10,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
 import org.gradle.api.plugins.BasePlugin;
-import org.gradle.api.plugins.ExtensionContainer;
-import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.tasks.TaskContainer;
 
 /**
@@ -27,24 +25,19 @@ public class WebAppPlugin implements Plugin<Project> {
 			project.getPlugins().apply(BasePlugin.class);
 		}
 		
-		initConfiguration(project.getExtensions());
+		project.getExtensions().create("webApp", WebAppExtension.class);
+		
 		initTasks(project.getTasks());
 	
-		// Integrate with the 'war' plugin if that has also been 
-		// applied by the project.
-		if (project.getPlugins().hasPlugin(WarPlugin.class) || hasTask(project, "war")) {
-			integrateWithWarPlugin(project.getTasks());
+		// Integrate with the WAR plugin.
+		if (hasTask(project, "war")) {
+			project.getTasks().getByName("war").dependsOn("packageWebApp");
 		}
 		
-		// Ensure that all NPM and/or Bower libraries have been 
-		// downloaded and refreshed.
+		// Integrate with the Client Dependencies plugin.
 		if (hasTask(project, "clientRefresh")) {
-			integrateWithClientLibrariesPlugin(project.getTasks());
+			project.getTasks().getByName("packageWebApp").dependsOn("clientRefresh");
 		}
-	}
-
-	private void initConfiguration(ExtensionContainer extensions) {
-		extensions.create("webApp", WebAppExtension.class);
 	}
 
 	private void initTasks(TaskContainer tasks) {
@@ -64,19 +57,5 @@ public class WebAppPlugin implements Plugin<Project> {
 		} catch (UnknownTaskException e) {
 			return false;
 		}
-	}
-	
-	/**
-	 * If the WAR plugin is also used in the same project, include the packaged 
-	 * web application into the WAR file instead of the original source files.
-	 */
-	private void integrateWithWarPlugin(final TaskContainer tasks) {
-		tasks.create("repackageWAR", RepackageWarFileTask.class);
-		tasks.getByName("repackageWAR").dependsOn("war", "packageWebApp");
-		tasks.getByName("assemble").dependsOn("repackageWAR");
-	}
-	
-	private void integrateWithClientLibrariesPlugin(TaskContainer tasks) {
-		tasks.getByName("packageWebApp").dependsOn("clientRefresh");
 	}
 }

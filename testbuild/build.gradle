@@ -8,10 +8,10 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'nl.colorize.gradle.webapp'
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 compileJava.options.encoding = 'UTF-8'
-webAppDirName = 'resources'
+webAppDirName = 'build/web'
 
 webApp.sourceDir = 'resources'
 webApp.buildDir = 'build/web'

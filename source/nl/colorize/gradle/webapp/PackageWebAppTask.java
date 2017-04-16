@@ -20,11 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Packages the web application by copying all files to the build directory. Note
- * that this does <em>not</em> copy the JavaScript source files, as they are
- * combined into a single file by the {@link CombineJavaScriptTask}. Also, any
- * HTML referencing the original JavaScript files will be rewritten to reference
- * the new combined JavaScript file instead.
+ * Packages the web application. This will process the HTML/CSS/JavaScript files
+ * in the web app's source directory, and copies the results to the build
+ * directory.
  */
 public class PackageWebAppTask extends DefaultTask {
 	
@@ -34,17 +32,15 @@ public class PackageWebAppTask extends DefaultTask {
 	public void run() {
 		WebAppExtension config = getProject().getExtensions().getByType(WebAppExtension.class);
 		File buildDir = config.getBuildDir(getProject());
-		cleanBuildDir(buildDir, config);
 		
-		for (File sourceFile : config.findWebAppFiles(getProject())) {
-			File outputFile = new File(buildDir.getAbsolutePath() + "/" + 
-					config.toRelativePath(getProject(), sourceFile));
-			
-			if (shouldRewriteSourceFile(sourceFile)) {
-				rewriteSourceFile(sourceFile, outputFile, config);
-			} else if (shouldCopySourceFile(sourceFile, config)) {
-				copyFile(sourceFile, outputFile, config);
-			}
+		cleanBuildDir(buildDir, config);
+		packageWebApp(buildDir, config);
+		
+		// Configure the WAR plugin to use the packaged web app, by
+		// pointing the "webAppDirName" property to the build dir.
+		File warWebAppDir = (File) getProject().getProperties().get("webAppDir");
+		if (warWebAppDir != null) {
+			getProject().setProperty("webAppDirName", config.getBuildDir());
 		}
 	}
 	
@@ -59,6 +55,19 @@ public class PackageWebAppTask extends DefaultTask {
 				}
 			}
 		});
+	}
+	
+	private void packageWebApp(File buildDir, WebAppExtension config) {
+		for (File sourceFile : config.findWebAppFiles(getProject())) {
+			File outputFile = new File(buildDir.getAbsolutePath() + "/" + 
+					config.toRelativePath(getProject(), sourceFile));
+			
+			if (shouldRewriteSourceFile(sourceFile)) {
+				rewriteSourceFile(sourceFile, outputFile, config);
+			} else if (shouldCopySourceFile(sourceFile, config)) {
+				copyFile(sourceFile, outputFile, config);
+			}
+		}
 	}
 
 	protected boolean shouldCopySourceFile(File sourceFile, WebAppExtension config) {
