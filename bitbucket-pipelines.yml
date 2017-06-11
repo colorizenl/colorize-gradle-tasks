@@ -1,0 +1,8 @@
+image: frekele/gradle:3.5-jdk8u121
+
+pipelines:
+    default:
+        - step:
+            script:
+                - gradle test
+                

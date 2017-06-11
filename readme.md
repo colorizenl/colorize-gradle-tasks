@@ -5,9 +5,10 @@ Gradle plugin for building HTML/CSS/JavaScript web applications. The plugin adds
 *packageWebApp* task that automatically runs as part of *assemble*. "Packaging" the web 
 application consists of the following steps:
 
-  - Combine all JavaScript files into a single combined JavaScript file.
-  - Rewrite all references to the original JavaScript source files to reference the combined
-    JavaScript file instead.
+  - Concatenates all JavaScript files into a single combined JavaScript file.
+  - Concatenates all CSS files into a single combined CSS file.
+  - Rewrite all references to the original JavaScript and CSS source files to reference the
+    combined files instead.
   - The resulting HTML, CSS, and JavaScript files are copied to the build directory.
   - If the *war* plugin is also used in the same project to build Java web applications, the 
     packaged web application will also be included in the WAR file.
@@ -21,7 +22,7 @@ Usage
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2017.2'
+    	id 'nl.colorize.gradle.webapp' version '2017.6'
     }
     
     webApp.sourceDir = 'src'
@@ -42,11 +43,20 @@ The plugin can be configured using the following properties:
 |----------|-------------|---------|
 | sourceDir | Source directory that contains the HTML/CSS/JavaScript files. The directory path is relative to the project directory. | web |
 | buildDir | Destination directory for the packaged web application. The directory path is relative to the project directory. | build/web |
-| combinedJavaScriptFileName | File name for the JavaScript file that is created during the build by combining all JavaScript source files. | combined.js |
 | excludes | List of exclude patterns (e.g. `['gulpfile.js', '*.map']`) of files that should not be included in the packaged web application. | (none) |
-| combineJavaScriptLibraries | Configures if JavaScript libraries should also be included in the combined JavaScript file. Detection of library files is based on directory structure (i.e. `lib/`, `node_modules/`, `bower_components/`). | false |
 | charset | Character encoding that is used to read and write text files. | UTF-8 |
+| combineJavaScriptEnabled | Configures if JavaScript files should be combined during the build. | true |
+| combinedJavaScriptFileName | File name for the JavaScript file that is created during the build by combining all JavaScript source files. | (projectName).js |
+| combineJavaScriptExcludes | List of exclude patterns for JavaScript files that should not be combined, and that will be packaged in their original form. | (none) |
+| combineJavaScriptLibraries | Configures if JavaScript libraries should also be included in the combined JavaScript file. Detection of library files is based on directory structure (i.e. `lib/`, `node_modules/`, `bower_components/`). | false |
+| combineCSSEnabled | Configures if CSS files should be combined during the build. | false |
+| combinedCSSFileName | File name used for the CSS file that is created during the build by combining all CSS source files. | (projectName).css |
+| combineCSSExcludes | List of exclude patterns for CSS files that should not be combined, and that will be packaged in their original form. | (none) |
 | syncDirs | The packages web application can optionally be synchronized to a list of other locations. | (none) |
+
+Note that JavaScript files are combined in alphabetical order. This is only relevant if your
+JavaScript files depend on the order in which they are loaded. In that case, exclude those files
+from being combined and set the load order manually.
     
 Build
 -----
