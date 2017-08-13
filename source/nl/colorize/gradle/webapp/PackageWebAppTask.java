@@ -23,6 +23,8 @@ import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import groovy.lang.Closure;
+
 /**
  * Packages the web application. This will process the HTML/CSS/JavaScript files
  * in the web app's source directory, and copies the results to the build
@@ -66,6 +68,61 @@ public class PackageWebAppTask extends DefaultTask {
 	}
 	
 	private void packageWebApp(File buildDir, WebAppExtension config) {
+		if (config.getCombineJavaScriptEnabled()) {
+			combineJavaScript(buildDir, config);
+		}
+		
+		if (config.getCombineCSSEnabled()) {
+			combineCSS(buildDir, config);
+		}
+		
+		if (isTypeScriptWebApp(config)) {
+			compileTypeScript();
+		}
+		
+		copyFiles(buildDir, config);
+	}
+
+	protected void combineJavaScript(File buildDir, WebAppExtension config) {
+		List<File> jsFiles = config.findCombinableJavaScriptFiles(getProject());
+		File combinedFile = config.getCombinedJavaScriptFile(getProject());
+		
+		LOGGER.debug("Combining JavaScript files " + jsFiles);
+		LOGGER.debug("Creating combined JavaScript file " + combinedFile.getAbsolutePath());
+		
+		combineFiles(jsFiles, combinedFile, config, config.getRewriteJavaScriptFilter());
+	}
+	
+	protected void combineCSS(File buildDir, WebAppExtension config) {
+		List<File> cssFiles = config.findCombinableCSSFiles(getProject());
+		File combinedFile = config.getCombinedCSSFile(getProject());
+		
+		LOGGER.debug("Combining CSS files " + cssFiles);
+		LOGGER.debug("Creating combined CSS file " + combinedFile.getAbsolutePath());
+		
+		combineFiles(cssFiles, combinedFile, config, null);
+	}
+	
+	protected void combineFiles(List<File> sourceFiles, File outputFile, 
+			WebAppExtension config, Closure<String> filter) {
+		FileConcatenator fileConcatenator = new FileConcatenator(config);
+		fileConcatenator.concatenate(sourceFiles, outputFile, config.getRewriteJavaScriptFilter());
+	}
+	
+	private boolean isTypeScriptWebApp(WebAppExtension config) {
+		List<File> tsFiles = config.findWebAppFiles(getProject()).stream()
+			.filter(file -> isTypeScriptFile(file))
+			.filter(file -> !file.getName().endsWith(".d.ts"))
+			.collect(Collectors.toList());
+		
+		return !tsFiles.isEmpty();
+	}
+	
+	private void compileTypeScript() {
+		getProject().exec(spec -> spec.commandLine("tsc"));
+	}
+	
+	private void copyFiles(File buildDir, WebAppExtension config) {
 		for (File sourceFile : config.findWebAppFiles(getProject())) {
 			File outputFile = new File(buildDir.getAbsolutePath() + "/" + 
 					config.toRelativePath(getProject(), sourceFile));
@@ -84,6 +141,8 @@ public class PackageWebAppTask extends DefaultTask {
 			boolean isGenerated = config.getCombinedJavaScriptFile(getProject()).equals(sourceFile);
 			
 			return !combinableJavaScriptFiles.contains(sourceFile) && !isGenerated;
+		} else if (isTypeScriptFile(sourceFile)) {
+			return false;
 		} else if (sourceFile.getName().endsWith(".css")) {
 			return !config.findCombinableCSSFiles(getProject()).contains(sourceFile);
 		} else {
@@ -91,6 +150,10 @@ public class PackageWebAppTask extends DefaultTask {
 		}
 	}
 	
+	private boolean isTypeScriptFile(File sourceFile) {
+		return sourceFile.getName().endsWith(".ts") || sourceFile.getName().endsWith(".tsx");
+	}
+
 	private boolean shouldRewriteSourceFile(File sourceFile) {
 		return sourceFile.getName().endsWith(".html");
 	}

@@ -41,12 +41,9 @@ public class WebAppPlugin implements Plugin<Project> {
 	}
 
 	private void initTasks(TaskContainer tasks) {
-		tasks.create("combineJavaScript", CombineJavaScriptTask.class);
-		tasks.create("combineCSS", CombineCSSTask.class);
 		tasks.create("packageWebApp", PackageWebAppTask.class);
 		tasks.create("syncWebApp", SyncWebAppTask.class);
 		
-		tasks.getByName("packageWebApp").dependsOn("combineJavaScript", "combineCSS");
 		tasks.getByName("syncWebApp").dependsOn("packageWebApp");
 		tasks.getByName("assemble").dependsOn("packageWebApp", "syncWebApp");
 	}

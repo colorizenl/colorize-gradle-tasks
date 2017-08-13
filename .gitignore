@@ -8,4 +8,5 @@ testbuild/userHome/
 .settings/
 .idea/
 *.iml
+resources/userHome/
 

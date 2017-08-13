@@ -6,6 +6,8 @@ Gradle plugin for building HTML/CSS/JavaScript web applications. The plugin adds
 application consists of the following steps:
 
   - Concatenates all JavaScript files into a single combined JavaScript file.
+  - If the project uses TypeScript instead of JavaScript, compiles the TypeScript files
+    into a JavaScript file.
   - Concatenates all CSS files into a single combined CSS file.
   - Rewrite all references to the original JavaScript and CSS source files to reference the
     combined files instead.
@@ -22,7 +24,7 @@ Usage
 The following example shows how to use the plugin from a Gradle build script:
 
     plugins {
-    	id 'nl.colorize.gradle.webapp' version '2017.6'
+        id 'nl.colorize.gradle.webapp' version '2017.9'
     }
     
     webApp.sourceDir = 'src'

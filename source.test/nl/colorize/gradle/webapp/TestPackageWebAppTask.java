@@ -20,7 +20,11 @@ import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Test;
 
+import groovy.lang.Closure;
+
 public class TestPackageWebAppTask {
+	
+	private static final Charset CHARSET = Charset.forName("UTF-8");
 
 	@Test
 	public void testRewriteJavaScriptFileReferences() throws Exception {
@@ -77,8 +81,119 @@ public class TestPackageWebAppTask {
 		assertTrue(task.shouldCopySourceFile(new File("/tmp/node_modules/test.js"), config));
 	}
 	
+	@Test
+	public void testCombineCSS() throws Exception {
+		WebAppExtension config = new WebAppExtension();
+		
+		File firstFile = File.createTempFile("first", ".css");
+		Files.write(firstFile.toPath(), Arrays.asList("first", "1"), CHARSET);
+		
+		File secondFile = File.createTempFile("second", ".css");
+		Files.write(secondFile.toPath(), Arrays.asList("second", "2"), CHARSET);
+		
+		File combinedFile = File.createTempFile("combined", ".css");
+		createTask().combineFiles(Arrays.asList(firstFile, secondFile), combinedFile, config, null);
+		List<String> lines = Files.readAllLines(combinedFile.toPath(), CHARSET);
+		
+		assertEquals(6, lines.size());
+		assertEquals("first", lines.get(0));
+		assertEquals("1", lines.get(1));
+		assertEquals("", lines.get(2));
+		assertEquals("second", lines.get(3));
+		assertEquals("2", lines.get(4));
+		assertEquals("", lines.get(5));
+	}
+	
+	@Test
+	public void testCombinedCssFileHasProjectName() {
+		Project project = createTask().getProject();
+		WebAppExtension config = new WebAppExtension();
+		File combinedFile = config.getCombinedCSSFile(project);
+		
+		assertEquals("test-" + config.getBuild() + ".css", combinedFile.getName());
+	}
+	
+	@Test
+	public void testWriteCombinedJavaScriptFile() throws Exception {
+		WebAppExtension config = new WebAppExtension();
+		
+		File firstFile = File.createTempFile("first", ".js");
+		Files.write(firstFile.toPath(), Arrays.asList("first", "1"), CHARSET);
+		
+		File secondFile = File.createTempFile("first", ".js");
+		Files.write(secondFile.toPath(), Arrays.asList("second", "2"), CHARSET);
+		
+		File combinedFile = File.createTempFile("combined", ".js");
+		createTask().combineFiles(Arrays.asList(firstFile, secondFile), combinedFile, config, null);
+		List<String> lines = Files.readAllLines(combinedFile.toPath(), CHARSET);
+		
+		assertEquals(6, lines.size());
+		assertEquals("first", lines.get(0));
+		assertEquals("1", lines.get(1));
+		assertEquals("", lines.get(2));
+		assertEquals("second", lines.get(3));
+		assertEquals("2", lines.get(4));
+		assertEquals("", lines.get(5));
+	}
+	
+	@Test
+	public void testExcludeJavaScriptFiles() throws Exception {
+		Project project = ProjectBuilder.builder().withProjectDir(new File("testbuild")).build();
+		WebAppExtension config = new WebAppExtension();
+		config.setSourceDir("resources");
+		List<File> jsFiles = config.findCombinableJavaScriptFiles(project);
+		
+		assertEquals(2, jsFiles.size());
+		assertEquals("first.js", jsFiles.get(0).getName());
+		assertEquals("second.js", jsFiles.get(1).getName());
+		
+		config.setExcludes(Arrays.asList("*fir*"));
+		jsFiles = config.findCombinableJavaScriptFiles(project);
+		
+		assertEquals(1, jsFiles.size());
+		assertEquals("second.js", jsFiles.get(0).getName());
+	}
+	
+	@Test
+	public void testRewriteJavaScriptFilter() throws Exception {
+		WebAppExtension config = new WebAppExtension();
+		config.setRewriteJavaScriptFilter(new Closure<String>(this) {
+			@Override
+			public String call(Object s) {
+				return s.equals("second") ? "2" : s.toString();
+			}
+		});
+		
+		File testFile = File.createTempFile("first", ".js");
+		Files.write(testFile.toPath(), Arrays.asList("first", "second", "third"), CHARSET);
+		
+		File combinedFile = File.createTempFile("combined", ".js");
+		createTask().combineFiles(Arrays.asList(testFile), combinedFile, config, 
+				config.getRewriteJavaScriptFilter());
+		List<String> lines = Files.readAllLines(combinedFile.toPath(), CHARSET);
+		
+		assertEquals(4, lines.size());
+		assertEquals("first", lines.get(0));
+		assertEquals("2", lines.get(1));
+		assertEquals("third", lines.get(2));
+		assertEquals("", lines.get(3));
+	}
+	
+	@Test
+	public void testDoNotCopyTypeScriptFiles() throws Exception {
+		PackageWebAppTask task = createTask();
+		WebAppExtension config = new WebAppExtension();
+		
+		assertFalse(task.shouldCopySourceFile(new File("test.ts"), config));
+		assertFalse(task.shouldCopySourceFile(new File("sub/test.ts"), config));
+	}
+	
+	private Project createProject() {
+		return ProjectBuilder.builder().withProjectDir(new File("/tmp")).build();
+	}
+	
 	private PackageWebAppTask createTask() {
-		Project project = ProjectBuilder.builder().withProjectDir(new File("/tmp")).build();
+		Project project = createProject();
 		WebAppPlugin plugin = new WebAppPlugin();
 		plugin.apply(project);
 		return (PackageWebAppTask) project.getTasks().getByName("packageWebApp");

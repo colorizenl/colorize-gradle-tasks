@@ -226,7 +226,7 @@ public class WebAppExtension {
 		normalizedName = normalizedName.replaceAll("\\s+", "-");
 		return normalizedName + "-" + build + "." + ext;
 	}
-	
+
 	/**
 	 * Returns the path of the specified file relative to the build directory.
 	 * @throws IllegalArgumentException if the file is located in a directory
