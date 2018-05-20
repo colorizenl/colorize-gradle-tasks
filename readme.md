@@ -1,6 +1,8 @@
 HTML/CSS/JavaScript web application plugin for Gradle
 =====================================================
 
+**This plugin is no longer maintained. Use the [Gradle Node plugin](https://github.com/srs/gradle-node-plugin) to directly call NodeJS tasks from Gradle, removing the need for this plugin.**
+
 Gradle plugin for building HTML/CSS/JavaScript web applications. The plugin adds the 
 *packageWebApp* task that automatically runs as part of *assemble*. "Packaging" the web 
 application consists of the following steps:
@@ -78,7 +80,7 @@ The following Gradle build tasks are available:
 License
 -------
 
-Copyright 2010-2017 Colorize
+Copyright 2010-2018 Colorize
 
 The source code is licensed under the Apache License 2.0, meaning you can use it free of charge 
 in commercial and non-commercial projects as long as you mention the original copyright.
